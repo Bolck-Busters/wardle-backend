@@ -8,7 +8,7 @@ const options = {
       version: "1.0.0",
       description: "wordle 프로젝트",
     },
-    host: "localhost:3300", // 요청 URL
+    host: "localhost:3000", // 요청 URL
     basePath: "/",
   },
   apis: ["./index.js"], //Swagger 파일 연동
