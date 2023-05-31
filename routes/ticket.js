@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const con = require("../mysql");
+const sql = require("../sql");
 
 module.exports = function () {
   // 티켓 사용
@@ -16,17 +17,13 @@ module.exports = function () {
     } else {
       _ticket = 5;
     }
-    con.query(
-      `UPDATE user SET ticket_count = ticket_count - ? WHERE wallet = ?`,
-      [_ticket, _wallet],
-      (err, result) => {
-        if (err) {
-          res.send("ERROR");
-        } else {
-          res.send("정상 처리");
-        }
+    con.query(sql.use_ticket, [_ticket, _wallet], (err, result) => {
+      if (err) {
+        res.send("ERROR");
+      } else {
+        res.send("정상 처리");
       }
-    );
+    });
   });
 
   // 티켓 구입
@@ -34,17 +31,13 @@ module.exports = function () {
     const _wallet = req.query.wallet;
     const _count = req.query.count;
     console.log(_wallet, _count);
-    con.query(
-      `UPDATE user SET ticket_count = ticket_count + ? WHERE wallet = ?`,
-      [_count, _wallet],
-      (err, result) => {
-        if (err) {
-          res.send("ERROR");
-        } else {
-          res.send("정상 처리");
-        }
+    con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
+      if (err) {
+        res.send("ERROR");
+      } else {
+        res.send("정상 처리");
       }
-    );
+    });
   });
 
   return router;
