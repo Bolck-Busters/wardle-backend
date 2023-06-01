@@ -51,11 +51,15 @@ module.exports = function () {
     const _wallet = req.body.wallet;
     const _nickname = req.body.nickname;
     console.log(_wallet, _nickname);
-    con.query(sql.signup, [_wallet, _nickname], (err, result) => {
+    con.query(sql.signup, [_wallet, _nickname, _nickname], (err, result) => {
       if (err) {
         res.json({ msg: "회원가입에 실패하였습니다.", result: false }); // 회원가입 실패
       } else {
-        res.json({ msg: "회원가입이 완료되었습니다.", result: true }); // 회원가입 성공
+        if (result.affectedRows == 0) {
+          res.json({ msg: "이미 존재하는 닉네임입니다.", result: false }); // 회원가입 실패 (닉네임 중복)
+        } else {
+          res.json({ msg: "회원가입이 완료되었습니다.", result: true }); // 회원가입 성공
+        }
       }
     });
   });

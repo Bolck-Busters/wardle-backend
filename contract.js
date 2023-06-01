@@ -1,5 +1,6 @@
+const Web3 = require("web3");
 const web3 = new Web3(
-  new Web3.providers.HttpProvider("https://rpc2.sepolia.org")
+  new Web3.providers.HttpProvider("https://rpc.sepolia.dev")
 );
 const abi = require("./ABI.json");
 const smartContract = new web3.eth.Contract(

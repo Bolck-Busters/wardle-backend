@@ -3,7 +3,6 @@ const app = express();
 const session = require("express-session");
 const con = require("./mysql");
 const sql = require("./sql");
-const Web3 = require("web3");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
@@ -13,12 +12,13 @@ const member = require("./routes/member")();
 const problem = require("./routes/problem");
 require("dotenv").config();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 app.use("/ticket", ticket);
 app.use("/count", count);
 app.use("/member", member);
 app.use("/problem", problem);
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
 // cors 설정 (http)
 app.use(
