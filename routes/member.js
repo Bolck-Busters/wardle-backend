@@ -4,26 +4,46 @@ const con = require("../mysql");
 const sql = require("../sql");
 
 module.exports = function () {
-  // 로그인
-  router.get("/login", (req, res) => {
+  // 신규회원 판별
+  router.get("/divide", (req, res) => {
     const _wallet = req.query.wallet;
     console.log(_wallet);
-    con.query(sql.login, [_address], (err, result) => {
+    con.query(sql.divide, [_wallet], (err, result) => {
       if (err) {
         res.send("sql error");
       } else {
         if (result.length != 0) {
-          console.log(result[0]["nickname"]);
-          res.send({ result: true });
+          res.send({ result: true }); // 기존회원인 경우
         } else {
-          res.send({ result: false });
+          res.send({ result: false }); // 신규회원인 경우
+        }
+      }
+    });
+  });
+
+  // 로그인
+  router.get("/login", (req, res) => {
+    const _wallet = req.query.wallet;
+    console.log(_wallet);
+    con.query(sql.login, [_wallet], (err, result) => {
+      if (err) {
+        res.send("sql error");
+      } else {
+        if (result.length != 0) {
+          req.session.member_info = result[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
+          res.send({ result: true }); // 로그인 성공
+        } else {
+          res.send({ result: false }); // 로그인 실패
         }
       }
     });
   });
 
   // 로그아웃
-  router.post("/logout", (req, res) => {});
+  router.get("/logout", (req, res) => {
+    req.session.destroy(); // 세션 삭제
+    res.json({ state: 0 }); // 로그아웃 상태 (세션 소멸)
+  });
 
   // 회원가입
   router.post("/signup", (req, res) => {
@@ -32,22 +52,9 @@ module.exports = function () {
     console.log(_wallet, _nickname);
     con.query(sql.signup, [_wallet, _nickname], (err, result) => {
       if (err) {
-        res.send({ result: false });
+        res.send({ result: false }); // 회원가입 실패
       } else {
-        res.send({ result: true });
-      }
-    });
-  });
-
-  // 유저 프로필 조회
-  router.get("/info", (req, res) => {
-    const _wallet = req.query.wallet;
-    console.log(_wallet);
-    con.query(sql.check_info, [_wallet], (err, result) => {
-      if (err) {
-        res.send("SQL Error");
-      } else {
-        res.send(result[0]);
+        res.send({ result: true }); // 회원가입 성공
       }
     });
   });

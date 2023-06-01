@@ -1,14 +1,60 @@
 const express = require("express");
 const app = express();
-const con = require("../mysql");
+const session = require("express-session");
+const con = require("./mysql");
+const sql = require("./sql");
 const Web3 = require("web3");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
-const { swaggerUi, specs } = require("./swagger/swagger");
 const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
+require("dotenv").config();
+
+app.use("/ticket", ticket);
+app.use("/count", count);
+app.use("/member", member);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// cors 설정
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    method: ["GET", "POST"],
+    credentials: true,
+  })
+);
+
+// 세션 세팅
+app.use(
+  session({
+    secret: process.env.session_key,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true },
+  })
+);
+
+// 세션 확인 -> 백에서는 확인한 후 결과를 프론트에 전송하여 상황에 따른 페이지 이동은
+// 프론트에서 처리하도록
+app.use("/mode", (req, res) => {
+  if (!req.session.member_info) {
+    console.log(req.session.member_info);
+    res.json({ state: 1 }); // 로그인 상태 (세션 유지)
+  } else {
+    res.json({ state: 0 }); // 로그아웃 상태 (세션 소멸)
+  }
+});
+
+// Swagger 설정
+const { swaggerUi, specs } = require("./swagger/swagger");
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, { explorer: true })
+);
 
 const web3 = new Web3(new Web3.providers.HttpProvider("컨트랙트 주소"));
 const abi = require("./ABI.json");
@@ -39,16 +85,13 @@ io.on("connection", (socket) => {
 
   // 문제 랜덤으로 뽑아 프론트에 송신
   socket.on("require_answer", (data) => {
-    con.query(
-      `SELECT answer FROM problem ORDER BY rand() LIMIT 1`,
-      (err, result) => {
-        if (err) {
-          socket.to(data.room).emit("Error");
-        } else {
-          socket.to(data.room).emit("결과 보냄", result[0].answer);
-        }
+    con.query(sql.give_problem, (err, result) => {
+      if (err) {
+        socket.to(data.room).emit("Error");
+      } else {
+        socket.to(data.room).emit("결과 보냄", result[0].answer);
       }
-    );
+    });
   });
 
   // 다음 순서로 전환 (프론트 코드 나오면 입력)
@@ -59,13 +102,6 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use("/ticket", ticket);
-app.use("/count", count);
-app.use("/member", member);
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
-server.listen(5000, () => {
+server.listen(3000, () => {
   console.log("Server Start");
 });

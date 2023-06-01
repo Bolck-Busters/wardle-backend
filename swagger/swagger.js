@@ -1,6 +1,5 @@
 const swaggerUi = require("swagger-ui-express");
 const swaggereJsdoc = require("swagger-jsdoc");
-
 const options = {
   swaggerDefinition: {
     info: {
@@ -11,7 +10,7 @@ const options = {
     host: "localhost:3000", // 요청 URL
     basePath: "/",
   },
-  apis: ["./index.js"], //Swagger 파일 연동
+  apis: ["../swagger.yml"], //Swagger 파일 연동
 };
 const specs = swaggereJsdoc(options);
 

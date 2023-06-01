@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const con = require("../mysql");
 const sql = require("../sql");
+const { smartContract, address } = require("../contract");
 
 module.exports = function () {
   // 티켓 사용
@@ -17,6 +18,7 @@ module.exports = function () {
     } else {
       _ticket = 5;
     }
+
     con.query(sql.use_ticket, [_ticket, _wallet], (err, result) => {
       if (err) {
         res.send("ERROR");
@@ -31,13 +33,25 @@ module.exports = function () {
     const _wallet = req.query.wallet;
     const _count = req.query.count;
     console.log(_wallet, _count);
-    con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
-      if (err) {
-        res.send("ERROR");
-      } else {
-        res.send("정상 처리");
-      }
-    });
+
+    // buyTicket 메소드
+    smartContract.methods
+      .buyTicket(_count, _wallet)
+      .call()
+      .then((result) => {
+        // result = {"0" : password, "1" : name, "2" : phone}
+        console.log(result);
+        if ((result[0] = true)) {
+          con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
+            if (err) {
+              res.send("ERROR");
+            } else {
+              res.send("정상 처리");
+            }
+          });
+        }
+        res.redirect("/");
+      });
   });
 
   return router;
