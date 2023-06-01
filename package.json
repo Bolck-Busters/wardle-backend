@@ -15,9 +15,12 @@
     "express-session": "^1.17.3",
     "http": "^0.0.1-security",
     "mysql2": "^3.3.3",
+    "process": "^0.11.10",
     "socket.io": "^4.6.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
-    "web3": "^1.10.0"
+    "web3": "^1.10.0",
+    "winston": "^3.9.0",
+    "winston-daily-rotate-file": "^4.7.1"
   }
 }
