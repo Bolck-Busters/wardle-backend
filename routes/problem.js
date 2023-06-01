@@ -4,7 +4,16 @@ const con = require("../mysql");
 const sql = require("../sql");
 
 module.exports = function () {
-  // 문제 랜덤으로 뽑아 전송
+  /**
+   * @swagger
+   * /problem/random:
+   *    get:
+   *      description: 문제 랜덤으로 뽑아 전송
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.get("/random", (req, res) => {
     con.query(sql.give_problem, (err, result) => {
       if (err) {

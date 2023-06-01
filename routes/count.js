@@ -4,7 +4,16 @@ const con = require("../mysql");
 const sql = require("../sql");
 
 module.exports = function () {
-  // 승리 횟수 +1
+  /**
+   * @swagger
+   * /count/win:
+   *    put:
+   *      description: 승리 횟수 +1
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/win/:wallet", (req, res) => {
     const _wallet = req.query.wallet;
     console.log(_wallet);
@@ -17,7 +26,16 @@ module.exports = function () {
     });
   });
 
-  // 패배 횟수 +1
+  /**
+   * @swagger
+   * /count/lose:
+   *    put:
+   *      description: 패배 횟수 +1
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/lose/:wallet", (req, res) => {
     const _wallet = req.query.wallet;
     console.log(_wallet);

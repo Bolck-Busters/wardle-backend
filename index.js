@@ -53,11 +53,7 @@ app.use("/mode", (req, res) => {
 
 // Swagger 설정
 const { swaggerUi, specs } = require("./swagger/swagger");
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(specs, { explorer: true })
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Socket 통신 설정
 const server = http.createServer(app);
