@@ -50,7 +50,6 @@ module.exports = function () {
             }
           });
         }
-        res.redirect("/");
       });
   });
 

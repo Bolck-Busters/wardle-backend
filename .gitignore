@@ -6,4 +6,6 @@
 
 # package-lock
 package-lock.json
+
+# sql
 sql.js

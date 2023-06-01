@@ -13,9 +13,9 @@ module.exports = function () {
         res.send("sql error");
       } else {
         if (result.length != 0) {
-          res.send({ result: true }); // 기존회원인 경우
+          res.send("new"); // 기존회원인 경우
         } else {
-          res.send({ result: false }); // 신규회원인 경우
+          res.send("exist"); // 신규회원인 경우
         }
       }
     });
@@ -31,9 +31,9 @@ module.exports = function () {
       } else {
         if (result.length != 0) {
           req.session.member_info = result[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
-          res.send({ result: true }); // 로그인 성공
+          res.json({ result: true }); // 로그인 성공
         } else {
-          res.send({ result: false }); // 로그인 실패
+          res.json({ result: false }); // 로그인 실패
         }
       }
     });
@@ -52,9 +52,9 @@ module.exports = function () {
     console.log(_wallet, _nickname);
     con.query(sql.signup, [_wallet, _nickname], (err, result) => {
       if (err) {
-        res.send({ result: false }); // 회원가입 실패
+        res.json({ result: false }); // 회원가입 실패
       } else {
-        res.send({ result: true }); // 회원가입 성공
+        res.json({ result: true }); // 회원가입 성공
       }
     });
   });
@@ -65,9 +65,9 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.withdrawl, [_wallet], (err, result) => {
       if (err) {
-        res.send({ result: false });
+        res.json({ result: false }); // 회원탈퇴 실패
       } else {
-        res.send({ result: true });
+        res.json({ result: true }); // 회원탈퇴 성공
       }
     });
   });

@@ -10,18 +10,20 @@ const { Server } = require("socket.io");
 const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
+const problem = require("./routes/problem");
 require("dotenv").config();
 
 app.use("/ticket", ticket);
 app.use("/count", count);
 app.use("/member", member);
+app.use("/problem", problem);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// cors 설정
+// cors 설정 (http)
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3000", // 프론트 주소
     method: ["GET", "POST"],
     credentials: true,
   })
@@ -33,7 +35,7 @@ app.use(
     secret: process.env.session_key,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true },
+    cookie: { maxAge: 2 * 60 * 60 * 1000, httpOnly: true }, // 세션쿠키 유효기간 2시간
   })
 );
 
@@ -56,13 +58,7 @@ app.use(
   swaggerUi.setup(specs, { explorer: true })
 );
 
-const web3 = new Web3(new Web3.providers.HttpProvider("컨트랙트 주소"));
-const abi = require("./ABI.json");
-const smartContract = new web3.eth.Contract(
-  abi,
-  "0x4Ff0c28bb08044cF583a3563D4013fB12bdFef1e"
-);
-
+// Socket 통신 설정
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
