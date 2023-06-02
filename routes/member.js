@@ -12,7 +12,7 @@ const sql = require("../sql");
 module.exports = function () {
   /**
    * @swagger
-   * /count/win:
+   * /member/divide:
    *    put:
    *      tags: [member]
    *      summary: 신규회원 판별
@@ -40,7 +40,7 @@ module.exports = function () {
 
   /**
    * @swagger
-   * /count/win:
+   * /member/login:
    *    post:
    *      tags: [member]
    *      summary: 로그인
@@ -71,7 +71,7 @@ module.exports = function () {
 
   /**
    * @swagger
-   * /count/win:
+   * /member/logout:
    *    post:
    *      tags: [member]
    *      summary: 로그아웃
@@ -88,7 +88,7 @@ module.exports = function () {
 
   /**
    * @swagger
-   * /count/win:
+   * /member/signup:
    *    post:
    *      tags: [member]
    *      summary: 회원가입

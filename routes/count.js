@@ -16,10 +16,24 @@ module.exports = function () {
    *    put:
    *      tags: [count]
    *      summary: 승리 횟수 +1
-   *      description: 승리 횟수 +1
+   *      parameters:
+   *        - in: body
+   *          name: wallet
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
    *      response:
    *        200:
    *          description: Sucess
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                    ok:
+   *
    *
    */
   router.put("/win", (req, res) => {

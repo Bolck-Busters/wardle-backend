@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const con = require("../mysql");
 const sql = require("../sql");
-const request = require("request");
 
 /**
  * @swagger
@@ -11,7 +10,17 @@ const request = require("request");
  *   description: 티켓 관련
  */
 module.exports = function () {
-  // 티켓 구입
+  /**
+   * @swagger
+   * /ticket/buy:
+   *    post:
+   *      tags: [ticket]
+   *      summary: 티켓 구입
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/buy", (req, res) => {
     const _wallet = req.body.wallet;
     const _count = req.body.count;
@@ -32,7 +41,17 @@ module.exports = function () {
     });
   });
 
-  // 티켓 사용
+  /**
+   * @swagger
+   * /ticket/use:
+   *    post:
+   *      tags: [ticket]
+   *      summary: 티켓 사용
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/use", (req, res) => {
     const _wallet = req.body.wallet;
     const _count = req.body.count;
@@ -61,7 +80,17 @@ module.exports = function () {
     }
   });
 
-  // 보상 티켓 획득
+  /**
+   * @swagger
+   * /ticket/reward:
+   *    post:
+   *      tags: [ticket]
+   *      summary: 보상 티켓 획득
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/reward", (req, res) => {
     const _wallet = req.body.wallet;
     const _count = req.body.count;
@@ -90,7 +119,17 @@ module.exports = function () {
     }
   });
 
-  // 보상 티켓 사용
+  /**
+   * @swagger
+   * /ticket/exchange:
+   *    post:
+   *      tags: [ticket]
+   *      summary: 보상 티켓 사용
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.put("/exchange", (req, res) => {
     const _wallet = req.body.wallet;
     const _count = req.body.count;
