@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json /app/
 ADD . /app
 RUN npm install
+RUN npm install -g pm2
 COPY .env .env
 COPY . .
 EXPOSE 3000
-CMD [ "node", "index.js" ]
+CMD [ "pm2-runtime", "start", "index.js" ]
