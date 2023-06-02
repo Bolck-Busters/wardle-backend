@@ -2,55 +2,121 @@ const express = require("express");
 const router = express.Router();
 const con = require("../mysql");
 const sql = require("../sql");
-const { smartContract, address } = require("../contract");
+const request = require("request");
 
+/**
+ * @swagger
+ * tags:
+ *   name: ticket
+ *   description: 티켓 관련
+ */
 module.exports = function () {
-  // 티켓 사용
-  router.put("/use", (req, res) => {
-    const _wallet = req.query.wallet;
-    const _level = req.query.level;
-    console.log(_wallet, _level);
-    let _ticket;
-    if (_level == 5) {
-      _ticket = 3;
-    } else if (_level == 6) {
-      _ticket = 4;
-    } else {
-      _ticket = 5;
-    }
+  // 티켓 구입
+  router.put("/buy", (req, res) => {
+    const _wallet = req.body.wallet;
+    const _count = req.body.count;
+    console.log(_wallet, _count);
 
-    con.query(sql.use_ticket, [_ticket, _wallet], (err, result) => {
+    con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
       if (err) {
-        res.send("ERROR");
+        res.json({
+          msg: "티켓 구입에 실패했습니다.",
+          result: false,
+        });
       } else {
-        res.send("정상 처리");
+        res.json({
+          msg: "티켓 구입에 성공하였습니다.",
+          result: true,
+        });
       }
     });
   });
 
-  // 티켓 구입
-  router.put("/buy", (req, res) => {
-    const _wallet = req.query.wallet;
-    const _count = req.query.count;
-    console.log(_wallet, _count);
+  // 티켓 사용
+  router.put("/use", (req, res) => {
+    const _wallet = req.body.wallet;
+    const _count = req.body.count;
+    const _result = req.body.result;
+    console.log(_wallet, _count, _result);
 
-    // buyTicket 메소드
-    smartContract.methods
-      .buyTicket(_count, _wallet)
-      .call()
-      .then((result) => {
-        // result = {"0" : password, "1" : name, "2" : phone}
-        console.log(result);
-        if ((result[0] = true)) {
-          con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
-            if (err) {
-              res.send("ERROR");
-            } else {
-              res.send("정상 처리");
-            }
+    if (_result) {
+      con.query(sql.use_ticket, [_count, _wallet], (err, result) => {
+        if (err) {
+          res.json({
+            msg: "티켓 사용에 실패했습니다. (DB 오류)",
+            result: false,
+          });
+        } else {
+          res.json({
+            msg: "티켓 사용이 정상적으로 처리되었습니다.",
+            result: true,
           });
         }
       });
+    } else {
+      res.json({
+        msg: "티켓 사용에 실패했습니다. (Contract 오류)",
+        result: false,
+      });
+    }
+  });
+
+  // 보상 티켓 획득
+  router.put("/reward", (req, res) => {
+    const _wallet = req.body.wallet;
+    const _count = req.body.count;
+    const _result = req.body.result;
+    console.log(_wallet, _count, _result);
+
+    if (_result) {
+      con.query(sql.reward, [_count, _wallet], (err, result) => {
+        if (err) {
+          res.json({
+            msg: "보상 티켓 획득에 실패했습니다. (DB 오류)",
+            result: false,
+          });
+        } else {
+          res.json({
+            msg: "보상 티켓 획득이 정상적으로 처리되었습니다.",
+            result: true,
+          });
+        }
+      });
+    } else {
+      res.json({
+        msg: "보상 티켓 획득에 실패했습니다. (Contract 오류)",
+        result: false,
+      });
+    }
+  });
+
+  // 보상 티켓 사용
+  router.put("/exchange", (req, res) => {
+    const _wallet = req.body.wallet;
+    const _count = req.body.count;
+    const _result = req.body.result;
+    console.log(_wallet, _count, _result);
+
+    if (_result) {
+      con.query(sql.exchange, [_count, _wallet], (err, result) => {
+        if (err) {
+          res.json({
+            msg: "보상 티켓 사용에 실패했습니다. (DB 오류)",
+            result: false,
+          });
+        } else {
+          res.json({
+            msg: "보상 티켓 사용이 정상적으로 처리되었습니다.",
+            result: true,
+          });
+        }
+      });
+    } else {
+      res.json({
+        msg: "보상 티켓 사용에 실패했습니다. (Contract 오류)",
+        result: false,
+      });
+    }
   });
 
   return router;

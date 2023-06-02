@@ -9,7 +9,7 @@ const { Server } = require("socket.io");
 const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
-const problem = require("./routes/problem");
+const problem = require("./routes/problem")();
 const logger = require("./logger");
 require("dotenv").config();
 
@@ -17,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/ticket", ticket);
+
 app.use("/count", count);
 app.use("/member", member);
 app.use("/problem", problem);
@@ -40,8 +41,7 @@ app.use(
   })
 );
 
-// 세션 확인 -> 백에서는 확인한 후 결과를 프론트에 전송하여 상황에 따른 페이지 이동은
-// 프론트에서 처리하도록
+// 세션 확인 -> 백에서는 확인한 후 결과를 프론트에 전송하여 상황에 따른 페이지 이동은 프론트에서 처리
 app.use("/mode", (req, res) => {
   if (!req.session.member_info) {
     console.log(req.session.member_info);

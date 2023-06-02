@@ -3,10 +3,27 @@ const router = express.Router();
 const con = require("../mysql");
 const sql = require("../sql");
 
+/**
+ * @swagger
+ * tags:
+ *   name: member
+ *   description: 회원 관련
+ */
 module.exports = function () {
-  // 신규회원 판별
-  router.get("/divide", (req, res) => {
-    const _wallet = req.query.wallet;
+  /**
+   * @swagger
+   * /count/win:
+   *    put:
+   *      tags: [member]
+   *      summary: 신규회원 판별
+   *      description: 신규회원 판별
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
+  router.post("/divide", (req, res) => {
+    const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.divide, [_wallet], (err, result) => {
       if (err) {
@@ -21,16 +38,28 @@ module.exports = function () {
     });
   });
 
-  // 로그인
-  router.get("/login", (req, res) => {
-    const _wallet = req.query.wallet;
-    console.log(_wallet);
-    con.query(sql.login, [_wallet], (err, result) => {
+  /**
+   * @swagger
+   * /count/win:
+   *    post:
+   *      tags: [member]
+   *      summary: 로그인
+   *      description: 로그인
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
+  router.post("/login", (req, res) => {
+    const _wallet = req.body.wallet;
+    console.log(sql.login);
+    con.query(sql.login, [_wallet], (err, data) => {
       if (err) {
         res.send("sql error");
       } else {
-        if (result.length != 0) {
-          req.session.member_info = result[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
+        if (data.length != 0) {
+          console.log(data[0]);
+          req.session.member_info = data[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
           console.log(req.session.member_info);
           res.json({ msg: "로그인에 성공하였습니다.", result: true }); // 로그인 성공
         } else {
@@ -40,17 +69,40 @@ module.exports = function () {
     });
   });
 
-  // 로그아웃
+  /**
+   * @swagger
+   * /count/win:
+   *    post:
+   *      tags: [member]
+   *      summary: 로그아웃
+   *      description: 로그아웃
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.get("/logout", (req, res) => {
     req.session.destroy(); // 세션 제거
-    res.json({ state: 0 }); // 로그아웃 상태 (세션 소멸)
+    res.json({ msg: "로그아웃이 완료되었습니다.", state: 0 }); // 로그아웃 상태 (세션 소멸)
   });
 
-  // 회원가입
+  /**
+   * @swagger
+   * /count/win:
+   *    post:
+   *      tags: [member]
+   *      summary: 회원가입
+   *      description: 회원가입
+   *      response:
+   *        200:
+   *          description: Sucess
+   *
+   */
   router.post("/signup", (req, res) => {
     const _wallet = req.body.wallet;
     const _nickname = req.body.nickname;
     console.log(_wallet, _nickname);
+    console.log(sql.signup);
     con.query(sql.signup, [_wallet, _nickname, _nickname], (err, result) => {
       if (err) {
         res.json({ msg: "회원가입에 실패하였습니다.", result: false }); // 회원가입 실패
@@ -66,7 +118,7 @@ module.exports = function () {
 
   // 회원 탈퇴
   router.delete("/withdrawl", (req, res) => {
-    const _wallet = req.query.wallet;
+    const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.withdrawl, [_wallet], (err, result) => {
       if (err) {

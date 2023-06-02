@@ -10,7 +10,7 @@ const options = {
     host: "localhost:3000", // 요청 URL
     basePath: "/",
   },
-  apis: ["./routes/*.js"], //Swagger 파일 연동
+  apis: ["./routes/*.js", "index.js"], //@Swagger 적용한 js 파일 연동 (상대 경로는 index.js 기준)
 };
 const specs = swaggereJsdoc(options);
 
