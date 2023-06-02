@@ -7,10 +7,10 @@ const options = {
       version: "1.0.0",
       description: "wordle 프로젝트",
     },
-    host: "localhost:3000", // 요청 URL
+    host: "35.216.70.231:3000", // 요청 URL
     basePath: "/",
   },
-  apis: ["./routes/*.js", "index.js"], //@Swagger 적용한 js 파일 연동 (상대 경로는 index.js 기준)
+  apis: ["./routes/*.js"], //@Swagger 적용한 js 파일 연동 (상대 경로는 index.js 기준)
 };
 const specs = swaggereJsdoc(options);
 

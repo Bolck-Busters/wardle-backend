@@ -15,19 +15,25 @@ module.exports = function () {
    * /problem/random:
    *    get:
    *      tags: [problem]
-   *      summary: 문제 랜덤으로 뽑아 전송
-   *      description: 문제 랜덤으로 뽑아 전송
-   *      response:
+   *      summary: 문제를 랜덤으로 뽑아 전송
+   *      parameters:
+   *        - name: length
+   *          in: query
+   *          description: 문자 길이
+   *          required: true
+   *          type: string
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.get("/random", (req, res) => {
     const _length = req.query.length;
     console.log(_length);
     con.query(sql.give_problem, [_length], (err, result) => {
       if (err) {
-        res.send("sql error");
+        res.send("SQL 에러 발생");
       } else {
         if (result.length != 0) {
           res.json({

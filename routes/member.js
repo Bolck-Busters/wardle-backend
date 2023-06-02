@@ -13,21 +13,31 @@ module.exports = function () {
   /**
    * @swagger
    * /member/divide:
-   *    put:
+   *    post:
    *      tags: [member]
-   *      summary: 신규회원 판별
-   *      description: 신규회원 판별
-   *      response:
+   *      summary: 회원 구분 (신규 / 기존)
+   *      parameters:
+   *        - name: wallet
+   *          in: body
+   *          description: 지갑 주소
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.post("/divide", (req, res) => {
     const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.divide, [_wallet], (err, result) => {
       if (err) {
-        res.send("sql error");
+        res.send("SQL 에러 발생");
       } else {
         if (result.length != 0) {
           res.json({ msg: "기존회원입니다.", type: "exist" }); // 기존회원인 경우
@@ -44,26 +54,41 @@ module.exports = function () {
    *    post:
    *      tags: [member]
    *      summary: 로그인
-   *      description: 로그인
-   *      response:
+   *      parameters:
+   *        - name: wallet
+   *          in: body
+   *          description: 지갑 주소
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.post("/login", (req, res) => {
     const _wallet = req.body.wallet;
-    console.log(sql.login);
+    console.log(_wallet);
     con.query(sql.login, [_wallet], (err, data) => {
       if (err) {
-        res.send("sql error");
+        res.json({
+          msg: "에러 발생으로 인하여 로그인에 실패하였습니다.",
+          result: false,
+        }); // 로그인 실패
       } else {
         if (data.length != 0) {
-          console.log(data[0]);
           req.session.member_info = data[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
           console.log(req.session.member_info);
           res.json({ msg: "로그인에 성공하였습니다.", result: true }); // 로그인 성공
         } else {
-          res.json({ msg: "로그인에 실패하였습니다.", result: false }); // 로그인 실패
+          res.json({
+            msg: "로그인에 실패하였습니다. (조회된 회원 정보 X)",
+            result: false,
+          }); // 로그인 실패
         }
       }
     });
@@ -75,13 +100,13 @@ module.exports = function () {
    *    post:
    *      tags: [member]
    *      summary: 로그아웃
-   *      description: 로그아웃
-   *      response:
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
-  router.get("/logout", (req, res) => {
+  router.post("/logout", (req, res) => {
     req.session.destroy(); // 세션 제거
     res.json({ msg: "로그아웃이 완료되었습니다.", state: 0 }); // 로그아웃 상태 (세션 소멸)
   });
@@ -92,11 +117,24 @@ module.exports = function () {
    *    post:
    *      tags: [member]
    *      summary: 회원가입
-   *      description: 회원가입
-   *      response:
+   *      parameters:
+   *        - name: JSON
+   *          in: body
+   *          description: 지갑 주소 & 회원 닉네임
+   *          required: true
+   *          type: string
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *              nickname:
+   *                type: string
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.post("/signup", (req, res) => {
     const _wallet = req.body.wallet;
@@ -105,7 +143,10 @@ module.exports = function () {
     console.log(sql.signup);
     con.query(sql.signup, [_wallet, _nickname, _nickname], (err, result) => {
       if (err) {
-        res.json({ msg: "회원가입에 실패하였습니다.", result: false }); // 회원가입 실패
+        res.json({
+          msg: "에러 발생으로 인하여 회원가입에 실패하였습니다.",
+          result: false,
+        }); // 회원가입 실패
       } else {
         if (result.affectedRows == 0) {
           res.json({ msg: "이미 존재하는 닉네임입니다.", result: false }); // 회원가입 실패 (닉네임 중복)
@@ -116,15 +157,43 @@ module.exports = function () {
     });
   });
 
-  // 회원 탈퇴
+  /**
+   * @swagger
+   * /member/withdrawl:
+   *    delete:
+   *      tags: [member]
+   *      summary: 회원탈퇴
+   *      parameters:
+   *        - name: wallet
+   *          in: body
+   *          description: 지갑 주소
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *      responses:
+   *        200:
+   *          description: Sucess
+   *          content:
+   *            application/json
+   */
   router.delete("/withdrawl", (req, res) => {
     const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.withdrawl, [_wallet], (err, result) => {
       if (err) {
-        res.json({ msg: "회원탈퇴에 실패하였습니다.", result: false }); // 회원탈퇴 실패
+        res.json({
+          msg: "에러 발생으로 인하여 회원탈퇴에 실패하였습니다.",
+          result: false,
+        }); // 회원탈퇴 실패 (에러)
       } else {
-        res.json({ msg: "회원탈퇴가 완료되었습니다.", result: true }); // 회원탈퇴 성공
+        if (result.affectedRows == 0) {
+          res.json({ msg: "잘못된 지갑 주소입니다.", result: false }); // 회원탈퇴 실패 (DB에 없는 지갑 주소 입력)
+        } else {
+          res.json({ msg: "회원탈퇴가 완료되었습니다.", result: true }); // 회원탈퇴 성공
+        }
       }
     });
   });

@@ -19,31 +19,34 @@ module.exports = function () {
    *      parameters:
    *        - in: body
    *          name: wallet
+   *          description: 지갑 주소
+   *          required: true
    *          schema:
    *            type: object
    *            properties:
    *              wallet:
    *                type: string
-   *      response:
+   *      responses:
    *        200:
    *          description: Sucess
    *          content:
-   *            application/json:
-   *              schema:
-   *                type: object
-   *                properties:
-   *                    ok:
-   *
-   *
+   *            application/json
    */
   router.put("/win", (req, res) => {
     const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.plus_win, [_wallet], (err, result) => {
       if (err) {
-        res.json({ msg: "승리 반영에 실패하였습니다.", result: false });
+        res.json({
+          msg: "에러 발생으로 인하여 승리 반영에 실패하였습니다.",
+          result: false,
+        });
       } else {
-        res.json({ msg: "승리 반영에 성공하였습니다.", result: true });
+        if (result.affectedRows == 1) {
+          res.json({ msg: "승리 반영에 성공하였습니다.", result: true });
+        } else {
+          res.json({ msg: "잘못된 지갑 주소입니다.", result: false });
+        }
       }
     });
   });
@@ -54,20 +57,38 @@ module.exports = function () {
    *    put:
    *      tags: [count]
    *      summary: 패배 횟수 +1
-   *      description: 패배 횟수 +1
-   *      response:
+   *      parameters:
+   *        - in: body
+   *          name: wallet
+   *          description: 지갑 주소
+   *          required: true
+   *          type: string
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.put("/lose", (req, res) => {
     const _wallet = req.body.wallet;
     console.log(_wallet);
     con.query(sql.plus_lose, [_wallet], (err, result) => {
       if (err) {
-        res.json({ msg: "패배 반영에 실패하였습니다.", result: false });
+        res.json({
+          msg: "에러 발생으로 인하여 패배 반영에 실패하였습니다.",
+          result: false,
+        });
       } else {
-        res.json({ msg: "패배 반영에 성공하였습니다.", result: true });
+        if (result.affectedRows == 1) {
+          res.json({ msg: "패배 반영에 성공하였습니다.", result: true });
+        } else {
+          res.json({ msg: "잘못된 지갑 주소입니다.", result: false });
+        }
       }
     });
   });

@@ -13,13 +13,26 @@ module.exports = function () {
   /**
    * @swagger
    * /ticket/buy:
-   *    post:
+   *    put:
    *      tags: [ticket]
    *      summary: 티켓 구입
-   *      response:
+   *      parameters:
+   *        - name: JSON
+   *          in: body
+   *          description: 지갑 주소 & 티켓 수량
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *              count:
+   *                type: number
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.put("/buy", (req, res) => {
     const _wallet = req.body.wallet;
@@ -44,13 +57,28 @@ module.exports = function () {
   /**
    * @swagger
    * /ticket/use:
-   *    post:
+   *    put:
    *      tags: [ticket]
    *      summary: 티켓 사용
-   *      response:
+   *      parameters:
+   *        - name: JSON
+   *          in: body
+   *          description: 지갑 주소 & 티켓 수량 & 컨트랙트 메소드 수행 결과
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *              count:
+   *                type: number
+   *              result:
+   *                type: boolean
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.put("/use", (req, res) => {
     const _wallet = req.body.wallet;
@@ -83,13 +111,28 @@ module.exports = function () {
   /**
    * @swagger
    * /ticket/reward:
-   *    post:
+   *    put:
    *      tags: [ticket]
    *      summary: 보상 티켓 획득
-   *      response:
+   *      parameters:
+   *        - name: JSON
+   *          in: body
+   *          description: 지갑 주소 & 티켓 수량 & 컨트랙트 메소드 수행 결과
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *              count:
+   *                type: number
+   *              result:
+   *                type: boolean
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.put("/reward", (req, res) => {
     const _wallet = req.body.wallet;
@@ -122,13 +165,28 @@ module.exports = function () {
   /**
    * @swagger
    * /ticket/exchange:
-   *    post:
+   *    put:
    *      tags: [ticket]
    *      summary: 보상 티켓 사용
-   *      response:
+   *      parameters:
+   *        - name: JSON
+   *          in: body
+   *          description: 지갑 주소 & 티켓 수량 & 컨트랙트 메소드 수행 결과
+   *          required: true
+   *          schema:
+   *            type: object
+   *            properties:
+   *              wallet:
+   *                type: string
+   *              count:
+   *                type: number
+   *              result:
+   *                type: boolean
+   *      responses:
    *        200:
    *          description: Sucess
-   *
+   *          content:
+   *            application/json
    */
   router.put("/exchange", (req, res) => {
     const _wallet = req.body.wallet;
