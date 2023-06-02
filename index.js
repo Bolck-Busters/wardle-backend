@@ -13,31 +13,22 @@ const problem = require("./routes/problem")();
 const logger = require("./logger");
 require("dotenv").config();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use("/ticket", ticket);
-
-app.use("/count", count);
-app.use("/member", member);
-app.use("/problem", problem);
-
 // cors 설정 (http)
 app.use(
   cors({
-    origin: "http://localhost:3000", // 프론트 주소
-    method: ["GET", "POST"],
+    origin: "*", // 프론트 주소(마지막에 수정 필수!)
+    method: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-// 세션 세팅
+// 세션 세팅(세션 세팅은 app.use를 통해 라우터를 호출하기 이전에 실행되어야 함)
 app.use(
   session({
     secret: process.env.session_key,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 2 * 60 * 60 * 1000, httpOnly: true }, // 세션쿠키 유효기간 2시간
+    cookie: { maxAge: 5 * 60 * 1000, httpOnly: true }, // 세션쿠키 유효기간 5분
   })
 );
 
@@ -50,6 +41,15 @@ app.use("/mode", (req, res) => {
     res.json({ state: 0 }); // 로그아웃 상태 (세션 소멸)
   }
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use("/ticket", ticket);
+
+app.use("/count", count);
+app.use("/member", member);
+app.use("/problem", problem);
 
 // Swagger 설정
 const { swaggerUi, specs } = require("./swagger/swagger");
