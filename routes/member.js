@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const con = require("../mysql");
 const sql = require("../sql");
+const logger = require("../logger");
 
 /**
  * @swagger
@@ -51,24 +52,30 @@ module.exports = function () {
   /**
    * @swagger
    * /member/login:
-   *    post:
-   *      tags: [member]
-   *      summary: 로그인
-   *      parameters:
-   *        - name: wallet
-   *          in: body
-   *          description: 지갑 주소
-   *          required: true
-   *          schema:
-   *            type: object
-   *            properties:
-   *              wallet:
-   *                type: string
-   *      responses:
-   *        200:
-   *          description: Sucess
-   *          content:
-   *            application/json
+   *   post:
+   *     tags: [member]
+   *     summary: 로그인
+   *     parameters:
+   *       - name: wallet
+   *         in: body
+   *         description: 지갑 주소
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             wallet:
+   *               type: string
+   *     responses:
+   *      200:
+   *        description: Sucess
+   *        schema:
+   *          properties:
+   *            msg:
+   *              type: string
+   *              example: 로그인에 성공하였습니다.
+   *            result:
+   *              type: boolean
+   *              example: true
    */
   router.post("/login", (req, res) => {
     const _wallet = req.body.wallet;
@@ -103,8 +110,14 @@ module.exports = function () {
    *      responses:
    *        200:
    *          description: Sucess
-   *          content:
-   *            application/json
+   *          schema:
+   *            properties:
+   *              msg:
+   *                type: string
+   *                example: 로그아웃이 완료되었습니다
+   *              state:
+   *                type: number
+   *                example: 0
    */
   router.post("/logout", (req, res) => {
     req.session.destroy(); // 세션 제거

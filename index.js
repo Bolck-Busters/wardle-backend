@@ -10,7 +10,6 @@ const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
 const problem = require("./routes/problem")();
-const logger = require("./logger");
 require("dotenv").config();
 
 // cors 설정 (http)
