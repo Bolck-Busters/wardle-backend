@@ -76,9 +76,30 @@ module.exports = function () {
    *            result:
    *              type: boolean
    *              example: true
-   *            nickname:
-   *              type: string
-   *              example: 닉네임
+   *            user_ifo:
+   *              type: object
+   *              properties:
+   *                user_id:
+   *                  type: number
+   *                  example: 1
+   *                wallet:
+   *                  type: string
+   *                  example: 지갑주소
+   *                nickname:
+   *                  type: string
+   *                  example: 닉네임
+   *                win_count:
+   *                  type: number
+   *                  example: 5
+   *                lose_count:
+   *                  type: number
+   *                  example: 3
+   *                ticket_count:
+   *                  type: number
+   *                  example: 10
+   *                reward_ticket:
+   *                  type: number
+   *                  example: 20
    */
   router.post("/login", (req, res) => {
     const _wallet = req.body.wallet;
@@ -91,12 +112,12 @@ module.exports = function () {
         }); // 로그인 실패
       } else {
         if (data.length != 0) {
-          req.session.member_info = data[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
-          console.log(req.session.member_info);
+          // req.session.member_info = data[0]; // 로그인을 하면 세션에 모든 유저 정보를 저장
+          console.log(data[0]);
           res.json({
             msg: "로그인에 성공하였습니다.",
             result: true,
-            nickname: data[0]["nickname"],
+            user_info: data[0],
           }); // 로그인 성공
         } else {
           res.json({
