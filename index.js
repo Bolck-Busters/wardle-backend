@@ -41,11 +41,12 @@ app.use("/mode", (req, res) => {
   }
 });
 
+// POST 사용 설정 (req.body 사용 가능하게)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// router 적용
 app.use("/ticket", ticket);
-
 app.use("/count", count);
 app.use("/member", member);
 app.use("/problem", problem);
@@ -94,6 +95,7 @@ io.on("connection", (socket) => {
   });
 });
 
+// 포트번호 3000으로 서버 실행
 server.listen(3000, () => {
   console.log("Server Start");
 });
