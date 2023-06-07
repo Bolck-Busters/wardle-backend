@@ -12,3 +12,6 @@ sql.js
 
 # log 파일
 /logs
+
+# swagger 설정 파일
+/swagger
