@@ -71,24 +71,19 @@ io.on("connection", (socket) => {
   // 프론트에서 socket.emit("join_room", romm) 송신 => 백에서 socket.on()을 통해 받음
   // 백에서도 socket.emit()을 통해 front로 송신 가능
   // join_room = 프론트에서 socket.emit()으로 설정한 변수
-  socket.on("join_romm", (data) => {
-    socket.join(data);
-    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+  // 프론트에서 유저가 입력한 값이랑 정답을 받음
+  socket.on("send", (data) => {
+    const _problem = data["problem"];
+    const _answer = data["answer"];
+    console.log(_problem, _answer);
+    let _result;
+    if (_problem === _answer) {
+      _result = true;
+    } else {
+      _result = false;
+    }
+    io.to(socket.id).emit("transfer_result", { result: _result });
   });
-
-  // 문제 랜덤으로 뽑아 프론트에 송신
-  socket.on("require_answer", (data) => {
-    con.query(sql.give_problem, (err, result) => {
-      if (err) {
-        socket.to(data.room).emit("Error");
-      } else {
-        socket.to(data.room).emit("결과 보냄", result[0].answer);
-      }
-    });
-  });
-
-  // 다음 순서로 전환 (프론트 코드 나오면 입력)
-  socket.on("next-turn", (data) => {});
 
   socket.on("disconnect", () => {
     console.log("연결 해제", socket.id);
