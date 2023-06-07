@@ -38,6 +38,7 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.plus_win, [_wallet], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "에러 발생으로 인하여 승리 반영에 실패하였습니다.",
           result: false,
@@ -80,6 +81,7 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.plus_lose, [_wallet], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "에러 발생으로 인하여 패배 반영에 실패하였습니다.",
           result: false,

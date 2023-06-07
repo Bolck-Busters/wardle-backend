@@ -38,6 +38,7 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.divide, [_wallet], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.send("SQL 에러 발생");
       } else {
         if (result.length != 0) {
@@ -106,6 +107,7 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.login, [_wallet], (err, data) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "에러 발생으로 인하여 로그인에 실패하였습니다.",
           result: false,
@@ -184,6 +186,7 @@ module.exports = function () {
     console.log(sql.signup);
     con.query(sql.signup, [_wallet, _nickname, _nickname], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "에러 발생으로 인하여 회원가입에 실패하였습니다.",
           result: false,
@@ -225,6 +228,7 @@ module.exports = function () {
     console.log(_wallet);
     con.query(sql.withdrawl, [_wallet], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "에러 발생으로 인하여 회원탈퇴에 실패하였습니다.",
           result: false,

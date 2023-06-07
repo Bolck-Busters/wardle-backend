@@ -42,6 +42,7 @@ module.exports = function () {
 
     con.query(sql.buy_ticket, [_count, _wallet], (err, result) => {
       if (err) {
+        logger.error("주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage);
         res.json({
           msg: "티켓 구입에 실패했습니다.",
           result: false,
@@ -90,6 +91,9 @@ module.exports = function () {
     if (_result) {
       con.query(sql.use_ticket, [_count, _wallet], (err, result) => {
         if (err) {
+          logger.error(
+            "주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage
+          );
           res.json({
             msg: "티켓 사용에 실패했습니다. (DB 오류)",
             result: false,
@@ -144,6 +148,9 @@ module.exports = function () {
     if (_result) {
       con.query(sql.reward, [_count, _wallet], (err, result) => {
         if (err) {
+          logger.error(
+            "주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage
+          );
           res.json({
             msg: "보상 티켓 획득에 실패했습니다. (DB 오류)",
             result: false,
@@ -198,6 +205,9 @@ module.exports = function () {
     if (_result) {
       con.query(sql.exchange, [_count, _wallet], (err, result) => {
         if (err) {
+          logger.error(
+            "주소 : " + _wallet + ", 에러 메시지 : " + err.sqlMessage
+          );
           res.json({
             msg: "보상 티켓 사용에 실패했습니다. (DB 오류)",
             result: false,

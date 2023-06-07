@@ -34,6 +34,9 @@ module.exports = function () {
     console.log(_length);
     con.query(sql.give_problem, [_length], (err, result) => {
       if (err) {
+        logger.error(
+          "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
+        );
         res.send("SQL 에러 발생");
       } else {
         if (result.length != 0) {
