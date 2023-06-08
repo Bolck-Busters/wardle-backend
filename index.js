@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 const session = require("express-session");
-const con = require("./mysql");
-const sql = require("./sql");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
@@ -59,30 +57,42 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // 프론트 주소
+    origin: "*", // 프론트 주소
     methods: ["GET", "POST"], // 허용할 methods 종류
   },
 });
+
+let roomNumber = 0;
+let userNumber = 0;
 
 // 소켓 연결 처리(connection은 연결에 대한 기본 설정)
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`); // client ID
 
   // room 하나에 유저 2명만 입장하도록 설정
-  let member_count = 0;
-  socket.on("room_check", (data) => {
-    const _roomId = data["roomId"];
-    socket.num = member_count;
-    if (typeof _roomId === "string") {
-      parseInt(_roomId);
-    }
-    if (socket.num < 2) {
-      socket.join(_roomId);
-      socket.num++;
+  socket.on("insert_room", (msg) => {
+    // user의 수가 2명이면
+    if (userNumber > 1) {
+      // room 증가
+      roomNumber = roomNumber + 1;
+      socket.join(`${roomNumber}`);
+
+      // user 초기화
+      userNumber = 0;
     } else {
-      socket.join(_roomId + 1);
-      socket.num = 1;
+      // user 수 증가
+      socket.join(`${roomNumber}`);
+      userNumber = userNumber + 1;
     }
+    console.log(`roomNumber ::: ${roomNumber} userNumber ::: ${userNumber}`);
+    // 1씩증가
+    console.log(`msg::: ${msg.nickname}`);
+    socket.join(`${roomNumber}`);
+    // socket.join(`some room`);
+
+    console.log(socket.rooms);
+
+    socket.to(msg).emit({ msg: "welcome" });
   });
 
   // 다음 유저 순서라는 것을 프론트에 알려줌
@@ -95,6 +105,7 @@ io.on("connection", (socket) => {
   // join_room = 프론트에서 socket.emit()으로 설정한 변수
   // 프론트에서 유저가 입력한 값이랑 정답을 받음
   socket.on("send", (data) => {
+    const _roomId = data["roomId"];
     const _problem = data["problem"];
     const _answer = data["answer"];
     console.log(_problem, _answer);
@@ -104,7 +115,7 @@ io.on("connection", (socket) => {
     } else {
       _result = false;
     }
-    io.to(socket.id).emit("transfer_result", { result: _result });
+    io.to(_roomId).emit("transfer_result", { result: _result });
   });
 
   socket.on("disconnect", () => {
