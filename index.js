@@ -68,6 +68,28 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`); // client ID
 
+  // room 하나에 유저 2명만 입장하도록 설정
+  let member_count = 0;
+  socket.on("room_check", (data) => {
+    const _roomId = data["roomId"];
+    socket.num = member_count;
+    if (typeof _roomId === "string") {
+      parseInt(_roomId);
+    }
+    if (socket.num < 2) {
+      socket.join(_roomId);
+      socket.num++;
+    } else {
+      socket.join(_roomId + 1);
+      socket.num = 1;
+    }
+  });
+
+  // 다음 유저 순서라는 것을 프론트에 알려줌
+  socket.on("next_turn", (data) => {
+    io.to(socket.id).emit("change_order", { result: true });
+  });
+
   // 프론트에서 socket.emit("join_room", romm) 송신 => 백에서 socket.on()을 통해 받음
   // 백에서도 socket.emit()을 통해 front로 송신 가능
   // join_room = 프론트에서 socket.emit()으로 설정한 변수
