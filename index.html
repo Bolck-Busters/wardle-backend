@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.io Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js"></script>
+  </head>
+
+  <body>
+    <h1>Socket.io Example</h1>
+    <input type="text" id="messageInput" placeholder="메시지를 입력하세요" />
+    <button id="buttonInput">전송</button>
+    <button id="roomInput">방입장</button>
+  </body>
+</html>
+<script>
+  // 보낼 것
+  const answer = "react";
+  const nickname = "asd";
+  // Socket.io 클라이언트 인스턴스 생성
+  const socket = io.connect("http://35.216.70.231:3000/", {
+    transports: ["websocket"],
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+  // 서버로부터의 메시지 수신
+  socket.on("send", (data) => {
+    const result = JSON.parse(data);
+    console.log(result);
+  });
+  socket.on("room_check", (data) => {
+    const result = JSON.parse(data);
+    console.log(result);
+  });
+
+  // 메시지 전송 함수
+  function sendMessage(value, answer) {
+    console.log("sendMessage");
+    const message = {
+      nickname: nickname,
+      value: value,
+      answer: answer,
+    };
+    // 서버로 메시지 전송
+    socket.emit("send", JSON.stringify(message));
+  }
+
+  function intoRoom(value, answer) {
+    console.log("intoRoom");
+    const message = {
+      nickname: nickname,
+      value: value,
+      answer: answer,
+    };
+    // 서버로 메시지 전송
+    socket.emit("insert_room", JSON.stringify(message));
+  }
+
+  // 버튼이벤트 감지
+  document.getElementById("buttonInput").addEventListener("click", (event) => {
+    const input = document.getElementById("messageInput").value;
+    sendMessage(input, answer);
+  });
+
+  // 방 입장 이벤트
+  document.getElementById("roomInput").addEventListener("click", (event) => {
+    const input = document.getElementById("messageInput").value;
+    intoRoom(input, answer);
+  });
+</script>
