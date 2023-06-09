@@ -16,22 +16,36 @@
   // 보낼 것
   const answer = "react";
   const nickname = "asd";
+  let roomNumber;
   // Socket.io 클라이언트 인스턴스 생성
-  const socket = io.connect("http://35.216.70.231:3000/", {
-    transports: ["websocket"],
+  const socket = io.connect("http://localhost:3000", {
     cors: {
       origin: "*",
       methods: ["GET", "POST"],
     },
   });
   // 서버로부터의 메시지 수신
-  socket.on("send", (data) => {
+  socket.on("transfer_result", (data) => {
     const result = JSON.parse(data);
     console.log(result);
   });
-  socket.on("room_check", (data) => {
-    const result = JSON.parse(data);
+
+  function intoRoom(value) {
+    console.log("intoRoom");
+    const msg = { length: 5 };
+    // 서버로 메시지 전송
+    socket.emit("insert_room", msg);
+  }
+
+  socket.on("insert_room", (data) => {
+    const result = data;
     console.log(result);
+    if (result.result === "success") {
+      console.log(result.result);
+      // 방 넘버
+      roomNumber = result.roomNum;
+      console.log("client roomNumber ::: " + roomNumber);
+    }
   });
 
   // 메시지 전송 함수
@@ -44,17 +58,6 @@
     };
     // 서버로 메시지 전송
     socket.emit("send", JSON.stringify(message));
-  }
-
-  function intoRoom(value, answer) {
-    console.log("intoRoom");
-    const message = {
-      nickname: nickname,
-      value: value,
-      answer: answer,
-    };
-    // 서버로 메시지 전송
-    socket.emit("insert_room", JSON.stringify(message));
   }
 
   // 버튼이벤트 감지
