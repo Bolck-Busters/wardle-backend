@@ -91,35 +91,38 @@ io.on("connection", (socket) => {
       console.log(_length);
       con.query(sql.give_problem, [_length], (err, result) => {
         if (err) {
+          console.log(1);
           logger.error(
             "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
           );
           res.send("SQL 에러 발생");
         } else {
           if (result.length != 0) {
-            res.json({
-              msg: "문제를 불러오는데 성공하였습니다.",
-              word: result[0]["answer"],
-              result: true,
+            // res.json({
+            //   msg: "문제를 불러오는데 성공하였습니다.",
+            //   word: result[0]["answer"],
+            //   result: true,
+            // });
+            console.log(2);
+            socket.emit("insert_room", {
+              roomNum: roomNumber,
+              result: "full",
+              userNumber: userNumber,
+              value: result[0]["answer"],
             });
           } else {
-            res.json({
-              msg: "문제를 불러오는데 실패하였습니다.",
-              word: "",
-              result: false,
-            });
+            // res.json({
+            //   msg: "문제를 불러오는데 실패하였습니다.",
+            //   word: "",
+            //   result: false,
+            // });
           }
         }
       });
-      socket.emit("insert_room", {
-        roomNum: roomNumber,
-        result: "full",
-        userNumber: userNumber,
-        value: _length,
-      });
+
       userNumber = 1;
     }
-    console.log(`room_number ::: ${room_number} user_count ::: ${user_count}`);
+    console.log(`room_number ::: ${roomNumber} user_count ::: ${userNumber}`);
     socket.join(`${roomNumber}`);
     // 클라이언트에게 룸번호 알려주기
     socket.emit("insert_room", {
