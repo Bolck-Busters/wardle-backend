@@ -101,12 +101,6 @@ io.on("connection", (socket) => {
           res.send("SQL 에러 발생");
         } else {
           if (result.length != 0) {
-            res.json({
-              msg: "문제를 불러오는데 성공하였습니다.",
-              word: result[0]["answer"],
-              result: true,
-            });
-
             socket.emit("insert_room", {
               roomNum: roomNumber,
               result: "success",
@@ -115,10 +109,10 @@ io.on("connection", (socket) => {
 
             answer[`${roomNumber}`] = result[0]["answer"];
           } else {
-            res.json({
-              msg: "문제를 불러오는데 실패하였습니다.",
-              word: "",
-              result: false,
+            socket.emit("insert_room", {
+              roomNum: roomNumber,
+              result: "fail",
+              userNumber: userNumber,
             });
           }
         }
@@ -129,12 +123,6 @@ io.on("connection", (socket) => {
 
     console.log(roomNumber, userNumber);
     socket.join(`${roomNumber}`);
-
-    // 클라이언트에게 룸번호 알려주기
-    socket.emit("insert_room", {
-      roomNum: roomNumber,
-      result: "success",
-    });
 
     if (!pending) {
       // 방에 있는 사람들한테 꽉찼다고 보냄
