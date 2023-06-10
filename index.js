@@ -7,7 +7,6 @@ const { Server } = require("socket.io");
 const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
-const problem = require("./routes/problem")();
 require("dotenv").config();
 
 // cors 설정 (http)
@@ -47,11 +46,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/ticket", ticket);
 app.use("/count", count);
 app.use("/member", member);
-app.use("/problem", problem);
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
 
 // Swagger 설정
 const { swaggerUi, specs } = require("./swagger/swagger");
@@ -68,89 +62,131 @@ const io = new Server(server, {
 
 let roomNumber = 0;
 let userNumber = 1;
+let pending = true; // 방에 1명만 들어오면 기다려야 하니 pending으로 클라이언트 통신
+let answer = {}; // 답 관리 {룸이름: 답이름}
 
 // 소켓 연결 처리(connection은 연결에 대한 기본 설정)
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`); // client ID
 
+  socket.onAny((e) => {
+    console.log(`소켓 이벤트: ${e}`);
+  });
+
   // room 하나에 유저 2명만 입장하도록 설정
   socket.on("insert_room", (data) => {
     // 초기값 0
     if (userNumber === 1) {
-      //룸 증가시켜
+      //방 번호 증가
       roomNumber = roomNumber + 1;
       socket.emit("insert_room", {
         roomNum: roomNumber,
-        result: "pending",
+        result: "success",
         userNumber: userNumber,
       });
-      // 유저넘버 증가시켜
+
+      // 대기 현황 업데이트
+      pending = true;
+
+      // 유저 넘버 증가
       userNumber = userNumber + 1;
     } else if (userNumber === 2) {
       const _length = data["length"];
       console.log(_length);
       con.query(sql.give_problem, [_length], (err, result) => {
         if (err) {
-          console.log(1);
           logger.error(
             "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
           );
           res.send("SQL 에러 발생");
         } else {
           if (result.length != 0) {
-            // res.json({
-            //   msg: "문제를 불러오는데 성공하였습니다.",
-            //   word: result[0]["answer"],
-            //   result: true,
-            // });
-            console.log(2);
+            res.json({
+              msg: "문제를 불러오는데 성공하였습니다.",
+              word: result[0]["answer"],
+              result: true,
+            });
+
             socket.emit("insert_room", {
               roomNum: roomNumber,
-              result: "full",
+              result: "success",
               userNumber: userNumber,
-              value: result[0]["answer"],
             });
+
+            answer[`${roomNumber}`] = result[0]["answer"];
           } else {
-            // res.json({
-            //   msg: "문제를 불러오는데 실패하였습니다.",
-            //   word: "",
-            //   result: false,
-            // });
+            res.json({
+              msg: "문제를 불러오는데 실패하였습니다.",
+              word: "",
+              result: false,
+            });
           }
         }
       });
-
+      pending = false;
       userNumber = 1;
     }
-    console.log(`room_number ::: ${roomNumber} user_count ::: ${userNumber}`);
+
+    console.log(roomNumber, userNumber);
     socket.join(`${roomNumber}`);
+
     // 클라이언트에게 룸번호 알려주기
     socket.emit("insert_room", {
       roomNum: roomNumber,
       result: "success",
     });
-  });
 
-  // 다음 유저 순서라는 것을 프론트에 알려줌
-  socket.on("next_turn", (data) => {
-    io.to(socket.id).emit("change_order", { result: true });
-  });
-
-  // 프론트에서 유저가 입력한 값이랑 정답을 받아서 비교 후 결과 반환
-  socket.on("send", (data) => {
-    const _roomId = data["roomId"];
-    const _problem = data["problem"];
-    const _answer = data["answer"];
-    console.log(_problem, _answer);
-    let _result;
-    if (_problem === _answer) {
-      _result = true;
-    } else {
-      _result = false;
+    if (!pending) {
+      // 방에 있는 사람들한테 꽉찼다고 보냄
+      io.to(String(roomNumber)).emit("pending", {
+        result: "success",
+        pending: pending,
+      });
     }
-    socket.to(_roomId).emit("transfer_result", { result: _result });
+    console.log("socket.rooms: ", socket.rooms); //
   });
 
+  // 턴 관리
+  socket.on("turn", (msg) => {
+    console.log(msg);
+    let turn;
+    if (msg.userNum === 1) {
+      turn = 2;
+    } else {
+      turn = 1;
+    }
+    console.log(turn);
+    io.to(msg.roomNum).emit("turn", { userTurn: turn, result: "success" });
+  });
+
+  // 답변받기
+  socket.on("answer", (msg) => {
+    console.log(msg);
+    console.log(answer[msg.roomNum]);
+
+    // 룸 방에 있는 정답 값과 유저가 입력한 값이 같을때(서버에 저장되어 있는 값이랑 같을 때)
+    if (answer[msg.roomNum] === msg.value) {
+      io.to(msg.roomNum).emit("answer", {
+        result: "success",
+        gameWin: true,
+        userNum: msg.userNum,
+      });
+    } else {
+      io.to(msg.roomNum).emit("answer", {
+        result: "success",
+        gameWin: false,
+        userNum: msg.userNum,
+      });
+    }
+  });
+
+  // 채팅방 나가기
+  socket.on("leaveRoom", (roomNumber) => {
+    io.socketsLeave(roomNumber);
+    console.log("socket.rooms: ", socket.rooms); //
+  });
+
+  // 소켓 연결 해제
   socket.on("disconnect", () => {
     console.log("연결 해제", socket.id);
   });
