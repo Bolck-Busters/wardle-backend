@@ -99,7 +99,6 @@ io.on("connection", (socket) => {
       console.log(_length);
       con.query(sql.give_problem, [_length], (err, result) => {
         if (err) {
-          console.log(1);
           logger.error(
             "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
           );
@@ -121,12 +120,11 @@ io.on("connection", (socket) => {
       });
       pending = false;
       userNumber = 1;
-      console.log(4);
     }
 
     console.log(roomNumber, userNumber);
     socket.join(`${roomNumber}`);
-    console.log(5);
+
     if (!pending) {
       // 방에 있는 사람들한테 꽉찼다고 보냄
       io.to(String(roomNumber)).emit("pending", {
@@ -134,7 +132,6 @@ io.on("connection", (socket) => {
         pending: pending,
       });
     }
-    console.log(6);
     console.log("socket.rooms: ", socket.rooms); //
   });
 
