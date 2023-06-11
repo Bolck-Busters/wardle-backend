@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const session = require("express-session");
 const con = require("./mysql");
+const sql = require("./sql");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
@@ -65,6 +66,8 @@ let roomNumber = 0;
 let userNumber = 1;
 let pending = true; // 방에 1명만 들어오면 기다려야 하니 pending으로 클라이언트 통신
 let answer = {}; // 답 관리 {룸이름: 답이름}
+let msg;
+let game_result;
 
 // 소켓 연결 처리(connection은 연결에 대한 기본 설정)
 io.on("connection", (socket) => {
@@ -96,35 +99,34 @@ io.on("connection", (socket) => {
       console.log(_length);
       con.query(sql.give_problem, [_length], (err, result) => {
         if (err) {
+          console.log(1);
           logger.error(
             "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
           );
           res.send("SQL 에러 발생");
         } else {
           if (result.length != 0) {
-            socket.emit("insert_room", {
-              roomNum: roomNumber,
-              result: "success",
-              userNumber: userNumber,
-            });
-
+            console.log("정답 : " + result[0]["answer"]);
+            msg = "success";
             answer[`${roomNumber}`] = result[0]["answer"];
           } else {
-            socket.emit("insert_room", {
-              roomNum: roomNumber,
-              result: "fail",
-              userNumber: userNumber,
-            });
+            msg = "fail";
           }
         }
       });
+      socket.emit("insert_room", {
+        roomNum: roomNumber,
+        result: msg,
+        userNumber: userNumber,
+      });
       pending = false;
       userNumber = 1;
+      console.log(4);
     }
 
     console.log(roomNumber, userNumber);
     socket.join(`${roomNumber}`);
-
+    console.log(5);
     if (!pending) {
       // 방에 있는 사람들한테 꽉찼다고 보냄
       io.to(String(roomNumber)).emit("pending", {
@@ -132,6 +134,7 @@ io.on("connection", (socket) => {
         pending: pending,
       });
     }
+    console.log(6);
     console.log("socket.rooms: ", socket.rooms); //
   });
 
@@ -155,18 +158,25 @@ io.on("connection", (socket) => {
 
     // 룸 방에 있는 정답 값과 유저가 입력한 값이 같을때(서버에 저장되어 있는 값이랑 같을 때)
     if (answer[msg.roomNum] === msg.value) {
-      io.to(msg.roomNum).emit("answer", {
-        result: "success",
-        gameWin: true,
-        userNum: msg.userNum,
-      });
+      game_result = true;
+      // io.to(msg.roomNum).emit("answer", {
+      //   result: "success",
+      //   gameWin: true,
+      //   userNum: msg.userNum,
+      // });
     } else {
-      io.to(msg.roomNum).emit("answer", {
-        result: "success",
-        gameWin: false,
-        userNum: msg.userNum,
-      });
+      game_result = false;
+      // io.to(msg.roomNum).emit("answer", {
+      //   result: "success",
+      //   gameWin: false,
+      //   userNum: msg.userNum,
+      // });
     }
+    io.to(msg.roomNum).emit("answer", {
+      result: "success",
+      gameWin: game_result,
+      userNum: msg.userNum,
+    });
   });
 
   // 채팅방 나가기
