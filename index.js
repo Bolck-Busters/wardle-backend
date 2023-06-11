@@ -159,18 +159,8 @@ io.on("connection", (socket) => {
     // 룸 방에 있는 정답 값과 유저가 입력한 값이 같을때(서버에 저장되어 있는 값이랑 같을 때)
     if (answer[msg.roomNum] === msg.value) {
       game_result = true;
-      // io.to(msg.roomNum).emit("answer", {
-      //   result: "success",
-      //   gameWin: true,
-      //   userNum: msg.userNum,
-      // });
     } else {
       game_result = false;
-      // io.to(msg.roomNum).emit("answer", {
-      //   result: "success",
-      //   gameWin: false,
-      //   userNum: msg.userNum,
-      // });
     }
     io.to(msg.roomNum).emit("answer", {
       result: "success",
