@@ -68,7 +68,7 @@ let pending = true; // 방에 1명만 들어오면 기다려야 하니 pending�
 let answer = {}; // 답 관리 {룸이름: 답이름}
 let msg;
 let game_result;
-
+let problem_answer;
 // 소켓 연결 처리(connection은 연결에 대한 기본 설정)
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`); // client ID
@@ -83,16 +83,19 @@ io.on("connection", (socket) => {
     if (userNumber === 1) {
       //방 번호 증가
       roomNumber = roomNumber + 1;
-      socket.emit("insert_room", {
-        roomNum: roomNumber,
-        result: "success",
-        userNumber: userNumber,
-      });
 
       // 대기 현황 업데이트
       pending = true;
 
       // 유저 넘버 증가
+      console.log(roomNumber, userNumber);
+      socket.join(`${roomNumber}`);
+
+      io.to(`${roomNumber}`).emit("insert_room", {
+        roomNum: roomNumber,
+        result: "success",
+        userNumber: userNumber,
+      });
       userNumber = userNumber + 1;
     } else if (userNumber === 2) {
       const _length = data["length"];
@@ -105,31 +108,35 @@ io.on("connection", (socket) => {
           res.send("SQL 에러 발생");
         } else {
           if (result.length != 0) {
-            console.log("정답 : " + result[0]["answer"]);
+            problem_answer = result[0]["answer"];
+            // 문제를 정상적으로 불러오면 answer 배열에 키(방번호):값(문제) 형태로 저장
+            console.log("정답 : " + problem_answer);
             msg = "success";
-            answer[`${roomNumber}`] = result[0]["answer"];
+            answer[`${roomNumber}`] = problem_answer;
           } else {
             msg = "fail";
           }
         }
       });
-      socket.emit("insert_room", {
+      console.log(roomNumber, userNumber);
+      socket.join(`${roomNumber}`);
+
+      pending = false;
+
+      io.to(`${roomNumber}`).emit("insert_room", {
         roomNum: roomNumber,
         result: msg,
         userNumber: userNumber,
       });
-      pending = false;
       userNumber = 1;
     }
 
-    console.log(roomNumber, userNumber);
-    socket.join(`${roomNumber}`);
-
     if (!pending) {
       // 방에 있는 사람들한테 꽉찼다고 보냄
-      io.to(String(roomNumber)).emit("pending", {
+      io.to(`${roomNumber}`).emit("pending", {
         result: "success",
         pending: pending,
+        answer: problem_answer,
       });
     }
     console.log("socket.rooms: ", socket.rooms); //
@@ -145,7 +152,7 @@ io.on("connection", (socket) => {
       turn = 1;
     }
     console.log(turn);
-    io.to(msg.roomNum).emit("turn", { userTurn: turn, result: "success" });
+    io.to(`${msg.roomNum}`).emit("turn", { userTurn: turn, result: "success" });
   });
 
   // 답변받기
@@ -159,7 +166,7 @@ io.on("connection", (socket) => {
     } else {
       game_result = false;
     }
-    io.to(msg.roomNum).emit("answer", {
+    io.to(`${msg.roomNum}`).emit("answer", {
       result: "success",
       gameWin: game_result,
       userNum: msg.userNum,
@@ -168,7 +175,7 @@ io.on("connection", (socket) => {
 
   // 채팅방 나가기
   socket.on("leaveRoom", (roomNumber) => {
-    io.socketsLeave(roomNumber);
+    io.socketsLeave(`${roomNumber}`);
     console.log("socket.rooms: ", socket.rooms); //
   });
 
