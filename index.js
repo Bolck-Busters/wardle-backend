@@ -66,6 +66,7 @@ let roomNumber = 0;
 let userNumber = 1;
 let pending = true; // 방에 1명만 들어오면 기다려야 하니 pending으로 클라이언트 통신
 let answer = {}; // 답 관리 {룸이름: 답이름}
+let user_answer = {};
 let msg;
 let game_result;
 let problem_answer;
@@ -132,6 +133,8 @@ io.on("connection", (socket) => {
     }
 
     if (!pending) {
+      user_answer[`${roomNumber}`] = [];
+
       // 방에 있는 사람들한테 꽉찼다고 보냄
       io.to(`${roomNumber}`).emit("pending", {
         result: "success",
@@ -156,10 +159,11 @@ io.on("connection", (socket) => {
   });
 
   // 답변받기
+  // roomNumber, value, userNumber
   socket.on("answer", (msg) => {
     console.log(msg);
     console.log(answer[msg.roomNum]);
-
+    user_answer[`${msg.roomNum}`].push(msg.value);
     // 룸 방에 있는 정답 값과 유저가 입력한 값이 같을때(서버에 저장되어 있는 값이랑 같을 때)
     if (answer[msg.roomNum] === msg.value) {
       game_result = true;
@@ -169,6 +173,7 @@ io.on("connection", (socket) => {
     io.to(`${msg.roomNum}`).emit("answer", {
       result: "success",
       gameWin: game_result,
+      value: user_answer[`${msg.roomNum}`],
       userNum: msg.userNum,
     });
   });
