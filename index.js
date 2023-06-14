@@ -62,8 +62,8 @@ const io = new Server(server, {
   },
 });
 
-let roomNumber = 0;
-let userNumber = 1;
+let room_number = 0;
+let user_number = 1;
 let pending = true; // 방에 1명만 들어오면 기다려야 하니 pending으로 클라이언트 통신
 let answer = {}; // 답 관리 {룸이름: 답이름}
 let user_answer = {};
@@ -81,24 +81,24 @@ io.on("connection", (socket) => {
   // room 하나에 유저 2명만 입장하도록 설정
   socket.on("insert_room", (data) => {
     // 초기값 0
-    if (userNumber === 1) {
+    if (user_number === 1) {
       //방 번호 증가
-      roomNumber = roomNumber + 1;
+      room_number = room_number + 1;
 
       // 대기 현황 업데이트
       pending = true;
 
       // 유저 넘버 증가
-      console.log(roomNumber, userNumber);
-      socket.join(`${roomNumber}`);
+      console.log(room_number, user_number);
+      socket.join(`${room_number}`);
 
-      io.to(`${roomNumber}`).emit("insert_room", {
-        roomNum: roomNumber,
+      io.to(`${room_number}`).emit("insert_room", {
+        roomNum: room_number,
         result: "success",
-        userNumber: userNumber,
+        user_number: user_number,
       });
-      userNumber = userNumber + 1;
-    } else if (userNumber === 2) {
+      user_number = user_number + 1;
+    } else if (user_number === 2) {
       const _length = data["length"];
       console.log(_length);
       con.query(sql.give_problem, [_length], (err, result) => {
@@ -113,30 +113,30 @@ io.on("connection", (socket) => {
             // 문제를 정상적으로 불러오면 answer 배열에 키(방번호):값(문제) 형태로 저장
             console.log("정답 : " + problem_answer);
             msg = "success";
-            answer[`${roomNumber}`] = problem_answer;
+            answer[`${room_number}`] = problem_answer;
           } else {
             msg = "fail";
           }
         }
       });
-      console.log(roomNumber, userNumber);
-      socket.join(`${roomNumber}`);
+      console.log(room_number, user_number);
+      socket.join(`${room_number}`);
 
       pending = false;
 
-      io.to(`${roomNumber}`).emit("insert_room", {
-        roomNum: roomNumber,
+      io.to(`${room_number}`).emit("insert_room", {
+        roomNum: room_number,
         result: msg,
-        userNumber: userNumber,
+        user_number: user_number,
       });
-      userNumber = 1;
+      user_number = 1;
     }
 
     if (!pending) {
-      user_answer[`${roomNumber}`] = [];
+      user_answer[`${room_number}`] = [];
 
       // 방에 있는 사람들한테 꽉찼다고 보냄
-      io.to(`${roomNumber}`).emit("pending", {
+      io.to(`${room_number}`).emit("pending", {
         result: "success",
         pending: pending,
         answer: problem_answer,
@@ -159,7 +159,7 @@ io.on("connection", (socket) => {
   });
 
   // 답변받기
-  // roomNumber, value, userNumber
+  // room_number, value, user_number
   socket.on("answer", (msg) => {
     console.log(msg);
     console.log(answer[msg.roomNum]);
@@ -179,8 +179,8 @@ io.on("connection", (socket) => {
   });
 
   // 채팅방 나가기
-  socket.on("leaveRoom", (roomNumber) => {
-    io.socketsLeave(`${roomNumber}`);
+  socket.on("leaveRoom", (room_number) => {
+    io.socketsLeave(`${room_number}`);
     console.log("socket.rooms: ", socket.rooms); //
   });
 
