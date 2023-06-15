@@ -5,6 +5,7 @@ const pool = require("./mysql_promise");
 const sql = require("./sql");
 const http = require("http");
 const cors = require("cors");
+const logger = require("./logger");
 const { Server } = require("socket.io");
 const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
@@ -96,7 +97,7 @@ io.on("connection", (socket) => {
       socket.join(`${roomNumber}`);
       // 통신
       try {
-        const con = await pool.getConnection(async (conn) => conn); // try~catch 적용해야
+        const con = await pool.getConnection(async (conn) => conn);
         let [problem] = await con.query(sql.give_problem, [_length]);
         console.log(problem);
         console.log(roomNumber, userNumber);
@@ -108,6 +109,7 @@ io.on("connection", (socket) => {
       } catch (error) {
         pending = false;
         msg = "fail";
+        logger.error(error);
         console.log(error);
       }
       io.to(`${roomNumber}`).emit("insert_room", {
