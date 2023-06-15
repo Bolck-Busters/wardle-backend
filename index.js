@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const session = require("express-session");
-const con = require("./mysql");
+const pool = require("./mysql_promise");
 const sql = require("./sql");
 const http = require("http");
 const cors = require("cors");
@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
     console.log(`소켓 이벤트: ${e}`);
   });
   // room 하나에 유저 2명만 입장하도록 설정
-  socket.on("insert_room", (data) => {
+  socket.on("insert_room", async (data) => {
     // 초기값 0
     if (userNumber === 1) {
       //방 번호 증가
@@ -92,29 +92,24 @@ io.on("connection", (socket) => {
     } else if (userNumber === 2) {
       const _length = data["length"];
       console.log(_length);
-      con.query(sql.give_problem, [_length], (err, result) => {
-        if (err) {
-          logger.error(
-            "글자 길이 : " + _length + ", 에러 메시지 : " + err.sqlMessage
-          );
-          res.send("SQL 에러 발생");
-        } else {
-          if (result.length != 0) {
-            problem_answer = result[0]["answer"];
-            // 문제를 정상적으로 불러오면 answer 배열에 키(방번호):값(문제) 형태로 저장
-            console.log("정답 : " + problem_answer);
-            msg = "success";
-            answer[`${roomNumber}`] = problem_answer;
-          } else {
-            msg = "fail";
-          }
-        }
-      });
-      console.log(roomNumber, userNumber);
+      // 방 참여
       socket.join(`${roomNumber}`);
+      // 통신
+      try {
+        const con = await pool.getConnection(async (conn) => conn); // try~catch 적용해야
+        let [problem] = await con.query(sql.give_problem, [_length]);
+        console.log(problem);
+        console.log(roomNumber, userNumber);
 
-      pending = false;
-
+        problem_answer = problem[0].answer.toUpperCase();
+        answer[`${roomNumber}`] = problem_answer;
+        pending = false;
+        msg = "success";
+      } catch (error) {
+        pending = false;
+        msg = "fail";
+        console.log(error);
+      }
       io.to(`${roomNumber}`).emit("insert_room", {
         roomNum: roomNumber,
         result: msg,
@@ -154,8 +149,10 @@ io.on("connection", (socket) => {
     console.log(msg);
     console.log(answer[msg.roomNum]);
     user_answer[`${msg.roomNum}`].push(msg.value);
+    const arr = user_answer[`${msg.roomNum}`];
+
     // 룸 방에 있는 정답 값과 유저가 입력한 값이 같을때(서버에 저장되어 있는 값이랑 같을 때)
-    if (answer[msg.roomNum] === msg.value.pop()) {
+    if (answer[msg.roomNum] === arr[arr.length - 1]) {
       game_result = true;
     } else {
       game_result = false;
