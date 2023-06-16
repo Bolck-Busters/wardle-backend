@@ -11,6 +11,7 @@ const ticket = require("./routes/ticket")();
 const count = require("./routes/count")();
 const member = require("./routes/member")();
 require("dotenv").config();
+
 // cors 설정 (http)
 app.use(
   cors({
@@ -19,6 +20,7 @@ app.use(
     credentials: true,
   })
 );
+
 // 세션 세팅(세션 세팅은 app.use를 통해 라우터를 호출하기 이전에 실행되어야 함)
 app.use(
   session({
@@ -28,6 +30,7 @@ app.use(
     cookie: { maxAge: 5 * 60 * 1000, httpOnly: true }, // 세션쿠키 유효기간 5분
   })
 );
+
 // 세션 확인 -> 백에서는 확인한 후 결과를 프론트에 전송하여 상황에 따른 페이지 이동은 프론트에서 처리
 app.use("/mode", (req, res) => {
   if (!req.session.member_info) {
@@ -37,16 +40,20 @@ app.use("/mode", (req, res) => {
     res.json({ state: 0 }); // 로그아웃 상태 (세션 소멸)
   }
 });
+
 // POST 사용 설정 (req.body 사용 가능하게)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
 // router 적용
 app.use("/ticket", ticket);
 app.use("/count", count);
 app.use("/member", member);
+
 // Swagger 설정
 const { swaggerUi, specs } = require("./swagger/swagger");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 // Socket 통신 설정
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -64,6 +71,7 @@ let user_answer = {};
 let msg;
 let game_result;
 let problem_answer;
+
 // 소켓 연결 처리(connection은 연결에 대한 기본 설정)
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`); // client ID
@@ -132,6 +140,7 @@ io.on("connection", (socket) => {
     }
     console.log("socket.rooms: ", socket.rooms); //
   });
+
   // 턴 관리
   socket.on("turn", (msg) => {
     console.log(msg);
