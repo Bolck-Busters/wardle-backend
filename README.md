@@ -21,4 +21,13 @@
 - 게임 참여 결과에 따른 보상 티켓 증정
 - 보상 티켓을 통한 토큰 획득
 
+### [맡은 역할 - 백엔드]
+- 프로젝트 설계 및 아이디어 기획
+- MySQL을 이용한 DB 설계
+- Node.js, Express.js를 이용한 REST API 설계 및 개발
+- Socket.io를 이용한 소켓 통신 개발
+- Postman을 이용한 API 테스트
+- Swagger를 이용한 API 문서화 및 테스트 세팅
+- Docker와 GCP를 이용한 백엔드 서버 & DB 서버 배포
+
 
